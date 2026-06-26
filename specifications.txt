@@ -1,1 +1,7 @@
-entier a =6;
+language close to Python but with type
+
+int a=5;
+int b=a+892;
+double b=6792;
+
+

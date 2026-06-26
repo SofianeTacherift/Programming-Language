@@ -79,5 +79,13 @@
     static bool T##_array_list_empty(list_type_name(T)* list) {\
         return list->size==0;\
     }\
+    \
+    static bool last_##T##_from(list_type_name(T) *list , T* buffer) { \
+        if (buffer !=NULL && list->size>0) {\
+            *buffer=list->elements[list->size-1];\
+            return true;\
+        }\
+        return false;\
+    }\
 
 #endif 

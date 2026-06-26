@@ -21,7 +21,8 @@ static char * TOKEN_TYPE_NAMES[] = {
     "DIVIDE",
     "DELIMITER",
     "PARENTHESE",
-    "IDENTIFIER"
+    "IDENTIFIER",
+    "IF"
 };
 
 typedef enum {
@@ -38,7 +39,8 @@ typedef enum {
     DIVIDE,
     DELIMITER,
     PARENTHESE,
-    IDENTIFIER
+    IDENTIFIER,
+    IF
 } token_type;
 
 typedef struct {
@@ -58,10 +60,14 @@ array_list(token);
 static char TOKEN_DISPLAY[TOKEN_DISPLAY_SIZE()];
 
 
+void print_token_in_list(token t);
+
+void print_token_list(token_array_list *list);
+
+void write_in_token_buffer(token t);
 
 
-
-
+void reverse_number_token_value(token *t);
 
 
 

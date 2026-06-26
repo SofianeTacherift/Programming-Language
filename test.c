@@ -4,12 +4,8 @@
 
 
 int main(void) {
-    token_array_list * list = new_token_array_list();
-    char * code ="bonjour vous alllez bien";
-    lexe
-    char * chaine = TOKEN_TYPE_NAMES[0];
-
-
+    char * code ="p=1; p=-p";
+    token_array_list * list = lexe_code(code);
     print_token_list(list);
     free(list);
 }
