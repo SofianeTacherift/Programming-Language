@@ -7,6 +7,10 @@ void print_token_in_list(token t) {
 }
 
 void print_token_list(token_array_list *list) {
+    if (list==NULL) {
+        printf("NULL\n");
+        return;
+    }
     printf("{ ");
     apply_token_operation(list, print_token_in_list);
     printf("}\n");
@@ -54,5 +58,50 @@ void reverse_number_token_value(token *t) {
         break;
     default:
         break;
+    }
+}
+
+
+token operator_to_token(char c) {
+    switch (c) {
+        case '+':
+            return (token) {.type=ADD};
+        case '-':
+            return (token) {.type=SUB};
+        case '*':
+            return (token) {.type=MULTIPLY};
+        case '/':
+            return (token) {.type=DIVIDE};
+        
+    }
+
+}
+
+bool is_operator_token(token t) {
+    switch (t.type)
+    {
+    case ADD:
+    case MULTIPLY :
+    case SUB:
+    case DIVIDE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool is_multiply_minus(token previous_token) {
+    return (is_operator_token(previous_token) || previous_token.type==AFFECTATION);
+}
+
+bool is_num_token(token t) {
+    switch (t.type)
+    {
+    case INT:
+    case FLOAT:
+    case DOUBLE:
+        return true;
+    default:
+        return false;
     }
 }

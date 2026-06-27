@@ -1,0 +1,10 @@
+expression :: unary | binary 
+
+affectation :: variable "=" expression
+
+unary :: "-" expression
+
+binary :: expression operator expression
+
+operator : "+" | "-" | "*" | "/"
+

@@ -1,5 +1,6 @@
 #include "array_list.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 #ifndef TOKEN_H
 #define TOKEN_H
@@ -8,6 +9,7 @@
 
 
 static char * TOKEN_TYPE_NAMES[] = {
+    "VAR_TYPE",
     "INT",
     "FLOAT",
     "DOUBLE",
@@ -22,10 +24,14 @@ static char * TOKEN_TYPE_NAMES[] = {
     "DELIMITER",
     "PARENTHESE",
     "IDENTIFIER",
-    "IF"
+    "IF",
+    "UNARY_MINUS",
+    "OPENING_PARENTHESE",
+    "CLOSING_PARENTHESE"
 };
 
 typedef enum {
+    VAR_TYPE,
     INT,
     FLOAT,
     DOUBLE,
@@ -40,8 +46,12 @@ typedef enum {
     DELIMITER,
     PARENTHESE,
     IDENTIFIER,
-    IF
+    IF,
+    UNARY_MINUS,
+    OPENING_PARENTHESE,
+    CLOSING_PARENTHESE
 } token_type;
+
 
 typedef struct {
     token_type type;
@@ -69,8 +79,14 @@ void write_in_token_buffer(token t);
 
 void reverse_number_token_value(token *t);
 
+token operator_to_token(char c);
 
 
+bool is_operator_token(token t);
+
+bool is_multiply_minus(token previous_token);
+
+bool is_num_token(token t);
 
 
 

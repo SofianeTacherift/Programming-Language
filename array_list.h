@@ -80,12 +80,11 @@
         return list->size==0;\
     }\
     \
-    static bool last_##T##_from(list_type_name(T) *list , T* buffer) { \
-        if (buffer !=NULL && list->size>0) {\
-            *buffer=list->elements[list->size-1];\
-            return true;\
+    static T *last_##T##_from(list_type_name(T) *list) { \
+        if (list->size<=0) {\
+            return NULL; \
         }\
-        return false;\
+        return list->elements+(list->size-1);\
     }\
 
 #endif 

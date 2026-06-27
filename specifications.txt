@@ -1,7 +1,11 @@
-language close to Python but with type
+langage specialized in mathematic
 
-int a=5;
-int b=a+892;
-double b=6792;
+No type
+
+a=5;
+b=a+892.2;  
+b=6792f;
+
+
 
 
