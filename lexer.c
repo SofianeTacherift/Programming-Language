@@ -213,6 +213,7 @@ token_array_list * lexe_code(char * code) {
 
     }
     printf("end\n");
+    add_token(tokens_list, (token) {.type=END});
     return tokens_list;
 
 

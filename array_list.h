@@ -15,7 +15,7 @@
 
 #define array_list(T) \
     \
-    typedef struct { \
+    typedef struct list_type_name(T) { \
     int size; \
     int capacity; \
     T* elements; \

@@ -8,6 +8,8 @@
 #define TOKEN_DISPLAY_SIZE() 100
 
 
+
+
 static char * TOKEN_TYPE_NAMES[] = {
     "VAR_TYPE",
     "INT",
@@ -27,7 +29,8 @@ static char * TOKEN_TYPE_NAMES[] = {
     "IF",
     "UNARY_MINUS",
     "OPENING_PARENTHESE",
-    "CLOSING_PARENTHESE"
+    "CLOSING_PARENTHESE",
+    "END"
 };
 
 typedef enum {
@@ -49,7 +52,8 @@ typedef enum {
     IF,
     UNARY_MINUS,
     OPENING_PARENTHESE,
-    CLOSING_PARENTHESE
+    CLOSING_PARENTHESE,
+    END
 } token_type;
 
 
