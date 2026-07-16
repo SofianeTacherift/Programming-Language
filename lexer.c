@@ -7,9 +7,24 @@
 #include "token.h"
 
 
+#define NL_UPDATE_LEXER(C, LEXER) if (C=='\n') {LEXER->current_line++; LEXER->current_char=0; }  
+#define LEXER_ADV_CHAR(LEXER) LEXER->current
 
 
 // return true if a substring who start with c is automaticly a new token
+
+
+lexer * new_lexer() {
+    lexer *res = malloc(sizeof(lexer));
+    if (res!=NULL) {
+        res->current_char=0;
+        res->current_line=0;
+        res->tokens_list=new_token_array_list();
+        res->lexing_status=NOT_USED_RES_I;
+    }
+    return res;
+}
+
 bool is_new_token(char c) {
     switch (c)
     {
@@ -28,7 +43,7 @@ bool is_new_token(char c) {
     }
 }
 
-int lexe_number(token_array_list *tokens_list, char *code, int start, int str_end) {
+int lexe_number(lexer *lexe, char *code, int start, int str_end) {
     int i=start;
     char * number =malloc(sizeof(char)*30);
     bool integer=true;
@@ -61,7 +76,7 @@ int lexe_number(token_array_list *tokens_list, char *code, int start, int str_en
             t.float_val=atof(number);
         }
     }
-    add_token(tokens_list, t);
+    add_token(lexe->tokens_list, t);
     return i;
 
 }

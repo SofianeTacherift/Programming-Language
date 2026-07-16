@@ -9,12 +9,20 @@
 #define NOT_USED_RES_I -2
 #define ERROR_RES_I -1
 
+typedef struct lexer {
+    token_array_list *tokens_list;
+    int current_line;
+    int current_char;
+    char error_buffer[1024];
+    int lexing_status;
+} lexer;
+
 
 static char ERROR_BUFFER[1024];
 
 
 
-int lexe_number(token_array_list *tokens_list, char *code, int start, int str_end);
+int lexe_number(lexer *lexe, char *code, int start, int str_end);
 
 int lexe_string( token_array_list *list,  char *code, int start, int str_end);
 

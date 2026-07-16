@@ -77,13 +77,14 @@ node * parse_affectation(parser *parse) {
 }
 
 node *parse_expression(parser *parse) {
-
+    RET_NULL_IF_ERROR
     return parse_additive(parse);
 }
 
 
 
 node * parse_identifier(parser * parse) {
+    RET_NULL_IF_ERROR
     node * res = new_node();
     token current = get_current_token(parse);
     res->type=VARIABLE_NODE;
@@ -120,10 +121,12 @@ node * token_num_to_node(token t) {
 
 
 bool is_unary_operator_token(token t ) {
+
     return t.type==UNARY_MINUS;
 }
 
 node * unary_token_to_node(token t) {
+
     node * result = new_node();
     if (t.type=UNARY_MINUS) {
         result->type=UNARY_NODE;
@@ -136,6 +139,7 @@ node * unary_token_to_node(token t) {
 }
 
 node * parse_unary(parser * parse) {
+    RET_NULL_IF_ERROR
     token t = get_current_token(parse);
     node * res = unary_token_to_node(t);
     advance(parse);
@@ -143,6 +147,9 @@ node * parse_unary(parser * parse) {
     return res;
 }
 node * parse_primary(parser * parse) {
+    RET_NULL_IF_ERROR
+
+
     token current = get_current_token(parse);
     node * result;
     if (is_num_token(current)) {
@@ -174,6 +181,7 @@ node * parse_primary(parser * parse) {
 
 
 node * parse_multiplicative(parser * parse) {
+    RET_NULL_IF_ERROR
     node *left = parse_primary(parse);
 
     node *center=NULL;
@@ -205,6 +213,7 @@ node * parse_multiplicative(parser * parse) {
 
 
 node * parse_additive(parser *parse) {
+    RET_NULL_IF_ERROR
     node *left=parse_multiplicative(parse);
     node *center=NULL;
     token current;

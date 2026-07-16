@@ -24,7 +24,6 @@ static char * TOKEN_TYPE_NAMES[] = {
     "MULTIPLY",
     "DIVIDE",
     "DELIMITER",
-    "PARENTHESE",
     "IDENTIFIER",
     "IF",
     "UNARY_MINUS",
@@ -47,7 +46,6 @@ typedef enum {
     MULTIPLY,
     DIVIDE,
     DELIMITER,
-    PARENTHESE,
     IDENTIFIER,
     IF,
     UNARY_MINUS,
@@ -66,6 +64,8 @@ typedef struct {
     char char_val;
     char *string_val;
     };
+    int line;
+    int character;
 } token;
 
 
