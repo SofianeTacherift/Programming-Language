@@ -1,32 +1,29 @@
 #include "hash.h"
 #include <stdio.h>
 
-
-
-
-
-
-
 int main(void) {
 
-    hash_table *table=new_hash_table(sizeof(char *), sizeof(int), hash_str, equal_str);
-    void * ptr = ",ndjede";
+hash_table *table = new_hash_table(sizeof(char *), sizeof(int), hash_str, equal_str);
 
+put_entry(table, PSTR(chaine_1), PINT(1));
+put_entry(table, PSTR(chainede), PINT(2));
+put_entry(table, PSTR(chain), PINT(3));
+put_entry(table, PSTR(chaine_4), PINT(4));
+put_entry(table, PSTR(chainf), PINT(5));
+put_entry(table, PSTR(chaine_6), PINT(6));
+put_entry(table, PSTR(chainefr), PINT(7));
+put_entry(table, PSTR(chaine_8), PINT(8));
+put_entry(table, PSTR(chaine_9), PINT(9));
+put_entry(table, PSTR(chaine_10), PINT(10));
+put_entry(table, PSTR(chaine_11), PINT(11));
 
+printf("Avant d'atteindre le seuil (load factor < 0.75) :\n");
+print_hash_table(table, &print_str, &print_int);
 
-    put(table, "chaine 1", &(int) {5});
-    put(table, "bonjour", &(int) {8});
-    put(table, "chaine 3", & (int) {8} );
-    put(table, "chaine 1", &(int) {919});
+put_entry(table, PSTR(chaine_12), PINT(12)); // 12/16 = 0.75, seuil atteint
 
-    int * res = get_value(table, "chaine 1");
-    if (res!=NULL) {printf("get de chaine 1 (res attendu 919) : %d\n", *res);}
-    printf("%d\n", contains_key(table, "bonjour"));
+printf("Apres avoir atteint le seuil (load factor >= 0.75) :\n");
+print_hash_table(table, &print_str, &print_int);
 
-
-    print_hash_table(table, &print_str, &print_int);
-
-
-
-    return 0;
+return 0;
 }

@@ -25,10 +25,10 @@ void write_in_token_buffer(token t) {
             snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=FLOAT - value=%f]", t.float_val );
             break;
         case DOUBLE :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=DOUBLE - value=%f]", t.double_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=DOUBLE - value=%lf]", t.double_val );
             break;
         case CHAR :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=CHAR - value=%f]", t.char_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=CHAR - value=%c]", t.char_val );
             break;
         case IDENTIFIER:
             snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=IDENTIFIER - value=%s]", t.string_val );
@@ -39,6 +39,11 @@ void write_in_token_buffer(token t) {
             break;
     }
 
+}
+
+void print_token(token t) {
+    write_in_token_buffer(t);
+    printf("%s", TOKEN_DISPLAY);
 }
 
 void reverse_number_token_value(token *t) {

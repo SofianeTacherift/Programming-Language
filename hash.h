@@ -3,6 +3,13 @@
 #include <stdbool.h>
 #include "array_list.h"
 
+#define STR(string) #string 
+#define PSTR(str) & (char*) { STR(str) }
+#define PINT(i) & (int) { i }
+#define PLONG(l) & (long) { l }
+#define PDOUBLE( d ) & (double) { d }
+#define PFLOAT ( f ) & (float ) { f }
+#define PCHAR(c) & (char) { c }
 
 
 
@@ -12,14 +19,11 @@ typedef struct entry {
     struct entry *next;
 } entry;
 
-typedef struct sentinel_entry {
-    entry * head;
-} sentinel_entry;
 
 typedef struct hash_table {
+    long capacity;
     long size;
-    double elements_count;
-    sentinel_entry * buckets;
+    entry ** buckets;
     long (*hash) (void*);
     bool (*equal) (void*, void *);
     size_t key_size;
@@ -63,7 +67,12 @@ hash_table *new_hash_table(size_t key_size, size_t value_size, long (*hash) (voi
 
 entry * new_entry(void *key, void *value, size_t key_size, size_t value_size);
 
-void put(hash_table * table, void * key,  void* value);
+void free_entry(entry * to_free);
+
+
+void set_hash_table_capacity(hash_table * table, size_t new_capacity);
+
+void put_entry(hash_table * table, void * key,  void* value);
 
 void print_hash_table(hash_table *table, void (print_key_function) (void*), void (print_value_function) (void*) );
 

@@ -212,7 +212,7 @@ token_array_list * lexe_code(char * code) {
         // printf("affected i=%d\n", i);
 
     }
-    printf("end\n");
+    printf("\ncode lexed\n");
     add_token(tokens_list, (token) {.type=END});
     return tokens_list;
 

@@ -80,6 +80,7 @@ void print_token_list(token_array_list *list);
 
 void write_in_token_buffer(token t);
 
+void print_token(token t);
 
 void reverse_number_token_value(token *t);
 

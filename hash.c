@@ -4,25 +4,29 @@
 #include <math.h>
 
 
-
 long hash_str(void *p) {
-    char *str=p;
+    char **strp=p;
+    char *str=*strp;
+
     long hash=0;
-    int len=strlen(p);
+    int len=strlen(str);
     for (int i=0; i<len;i++) {
         int charI=str[i];
-        hash+=charI*pow(31,  len-1-i);
+        hash=31*hash+charI;
     }
     return hash;
 }
 
 bool equal_str(void *p1, void *p2) {
-    int cmp=strcmp((char*) p1, (char*) p2);
+    char **strp1=p1, **strp2=p2;
+
+    int cmp=strcmp(*strp1,  *strp2);
     return cmp==0;
 }
 
 void print_str(void *p) {
-    printf("%s", (char*)p);
+    char **strp=p;
+    printf("%s", *strp);
 }
 
 long hash_int(void *p) {
@@ -90,15 +94,20 @@ void print_char(void *p) {
 }
 
 
-
+void *copy_ptr(void *ptr, size_t size) {
+    void * copy = malloc(size);
+    memcpy(copy, ptr, size);
+    return copy;
+}
 
 
 hash_table *new_hash_table(size_t key_size, size_t value_size, long (*hash) (void*), bool (*equal) (void*, void*) ) {
     if (hash ==NULL || equal==NULL) {return NULL;}
     hash_table * res = malloc(sizeof(hash_table));
-    res->size=16;
-    res->buckets=malloc(res->size*sizeof(sentinel_entry ));
-    res->elements_count=0;
+    size_t capacity=16;
+    res->capacity=capacity;
+    res->buckets=calloc(capacity,sizeof(entry*));
+    res->size=0;
     res->key_size=key_size;
     res->value_size=value_size;
     res->equal=equal;
@@ -120,51 +129,108 @@ entry * new_entry(void *key, void *value, size_t key_size, size_t value_size) {
     return res;
 }
 
-void put(hash_table * table, void * key,  void* value) {
+
+void free_entry(entry *to_free) {
+    entry tfe = *to_free;
+    free(tfe.key);
+    free(tfe.value);
+    free(to_free);
+
+}
+void set_hash_table_capacity(hash_table * table, size_t new_capacity) {
+    size_t old_capacity=table->capacity;
+    int count=0;
+    table->capacity=new_capacity;
+    table->buckets=realloc(table->buckets, new_capacity*sizeof(entry*));
+    for (int i=old_capacity; i<new_capacity; i++) {
+        table->buckets[i]=NULL;
+    }
+
+
+
+    for (int i=0; i<old_capacity; i++) {
+        entry * current = table->buckets[i];
+        table->buckets[i]=NULL;
+        while (current!=NULL) {
+            
+
+
+            entry * copy = current;
+
+            current=current->next;
+
+            long hash = table->hash(copy->key);
+            long  new_index=hash & (table->capacity-1);
+            entry * start = table->buckets[new_index];
+            table->buckets[new_index]=copy;
+            
+
+            copy->next=start;
+
+
+
+
+        }
+
+
+    }
+
+
+}
+
+void put_entry(hash_table * table, void * key,  void* value) {
     if (key==NULL || value==NULL) {return;}
     long hash = table->hash(key);
-    int index= hash & (table->size-1);
-    // printf("chaine =%s - hash = %ld - index = %d\n",(char*) key , hash, index);
+    int index= hash & (table->capacity-1);
 
-    sentinel_entry * sentinel = table->buckets+index;
-    if (sentinel->head==NULL) {
-        sentinel->head=new_entry(key, value, table->key_size, table->value_size); 
-        table->elements_count++;
 
-        return;
+    entry * start = table->buckets[index];
+    entry sentinel = {.next=start};
+    entry *current = &sentinel;
+
+    while (current->next!=NULL && !table->equal(current->next->key, key)) {
+        current=current->next;
     }
-    else {
-        entry *current= sentinel->head;
-        while (current->next!=NULL && !table->equal(current->key, key)) {
-            current=current->next;
-        }
-        if (table->equal(current->key, key)) {
-            memcpy(current->key, key, table->key_size);
-            memcpy(current->value, value, table->value_size);
-            return;
+    if (current->next==NULL) {
+        entry * new=new_entry(key, value, table->key_size, table->value_size );
+        if (current->next==start) {
+            table->buckets[index]=new;       
         }
         else {
-            current->next=new_entry(key, value, table->key_size, table->value_size);
+            current->next=new;
         }
+        table->size++;
     }
-    table->elements_count++;
+    else {
+        memcpy(current->next->value, value, table->value_size);
+    }
+
+    double capacity = (double) table->capacity;
+    double size = (double) table->size;
+    if (size/capacity>=0.75) {
+        set_hash_table_capacity(table, table->capacity*2);
+    }
+
+    
 
 }
 
 
+
+
 void print_hash_table(hash_table *table, void (print_key_function) (void*), void (print_value_function) (void*) ) {
     if (print_key_function==NULL || print_value_function==NULL) {return;}
-    printf("{ ");
+    printf("hash_table size=%ld capacity = %ld - elements = { ", table->size, table->capacity);
     int count=0;
-    for (int i=0; i<table->size; i++) {
-        entry *current=(table->buckets[i]).head;
+    for (int i=0; i<table->capacity; i++) {
+        entry *current=(table->buckets[i]);
         while (current!=NULL) {
             count++;
+            printf("index=%d ", i);
             print_key_function(current->key);
             printf(" : ");
             print_value_function(current->value);
-            if (count>=table->elements_count) {
-
+            if (count>=table->size) {
                 printf(" }\n");
                 return;
             }
@@ -180,9 +246,9 @@ void print_hash_table(hash_table *table, void (print_key_function) (void*), void
 bool contains_key(hash_table * table, void *key) {
     if (key==NULL) {return NULL;}
     long hash=table->hash(key);
-    int index = hash & (table->size-1);
+    int index = hash & (table->capacity-1);
 
-    entry *current=(table->buckets[index]).head;
+    entry *current=(table->buckets[index]);
     while (current!=NULL) {
         if (table->equal(key, current->key)) {
             return true;
@@ -195,8 +261,8 @@ bool contains_key(hash_table * table, void *key) {
 void * get_value(hash_table * table, void *key) {
     if (key==NULL) {return NULL;}
     long hash=table->hash(key);
-    int index = hash & (table->size-1);
-    entry *current=(table->buckets[index]).head;
+    int index = hash & (table->capacity-1);
+    entry *current=(table->buckets[index]);
     while (current!=NULL) {
         if (table->equal(key, current->key)) {
             return current->value;
@@ -206,10 +272,28 @@ void * get_value(hash_table * table, void *key) {
     return NULL;
 }
 
+
 void remove_key(hash_table *table, void * key) {
     if (key==NULL) {return;}
     long hash=table->hash(key);
-    int index = hash & (table->size-1);
+    int index = hash & (table->capacity-1);
+    entry sentinel = (entry) {.next=table->buckets[index]};
+    entry *current = &sentinel;
+    
+    while (current->next !=NULL && !table->equal(current->next->key, key)) {
+        current=current->next;
+    }
+    if (current->next!=NULL) {
+        entry * removed = current->next;
+        current->next=current->next->next;
+        if (removed==table->buckets[index]) {
+            table->buckets[index]=removed->next;
+        }
+        free_entry(removed);
+        table->size --;
+    }
 
 }
+
+
 

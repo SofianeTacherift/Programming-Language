@@ -22,6 +22,8 @@ bool is_new_token(char c);
 
 bool is_operator(char c);
 
+int lexe_minus(token_array_list* tokens_list, char *code, int i, int str_end);
+
 token operator_to_token(char c);
 
 

@@ -1,13 +1,12 @@
 
-affectation :: variable "=" expression
 
-expression :: multiplicative || additive
+expression :: ( identifier "="  ) | calculation
 
-unary :: "-" expression
+calculation :: multiplicative ('+' | '-') multiplicative
 
-binary :: expression operator expression
+multiplicative :: primary ('*' | '/') primary 
 
-variable :: 
+primary :: unary | number | name | '(' calculation ')'
 
-operator :: "+" | "-" | "*" | "/"
+
 
