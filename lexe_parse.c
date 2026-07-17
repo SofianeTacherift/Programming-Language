@@ -19,10 +19,7 @@ int main(int argc, char ** argv) {
 
 
     parser *parse= new_parser(list);
-    node * res =parse_statement(parse);
-    if (res==NULL) {
-        printf("NULL\n");
-    }
+    node * res = begin_parsement(parse);
     if (parse->parsing_status==PARSING_ERROR) {
         printf("%s\n", parse->parsing_error_buffer);
         return 2;

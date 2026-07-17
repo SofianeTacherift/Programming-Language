@@ -88,6 +88,7 @@ bool is_operator_token(token t) {
     case MULTIPLY :
     case SUB:
     case DIVIDE:
+    case UNARY_MINUS:
         return true;
     default:
         return false;

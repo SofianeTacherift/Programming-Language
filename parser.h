@@ -102,4 +102,5 @@ void free_tree_node(node *n);
 
 void display_tree_node(node * node);
 
+node * begin_parsement(parser *parse);
 #endif

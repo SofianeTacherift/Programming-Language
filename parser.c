@@ -50,6 +50,11 @@ parser * new_parser(token_array_list * tokens) {
     return result;
 }
 
+node * begin_parsement(parser *parse) {
+    if (parse->tokens==NULL) {return NULL;}
+    return parse_statement(parse);
+}
+
 
 node * parse_statement(parser *parse) {
     token current = get_current_token(parse);
@@ -109,11 +114,11 @@ node * token_num_to_node(token t) {
         break;
     case FLOAT:
         node->type=FLOAT_NODE;
-        node->int_val=t.float_val;
+        node->float_val=t.float_val;
         break;
     case DOUBLE:
         node->type=DOUBLE_NODE;
-        node->int_val=t.double_val;
+        node->double_val=t.double_val;
         break;
     default:
         return NULL;
@@ -205,13 +210,13 @@ node * parse_multiplicative(parser * parse) {
 
     if (center==NULL) {center = left;}
     
-    // if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
-    //     parse->parsing_status=PARSING_ERROR;
+    if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
+        parse->parsing_status=PARSING_ERROR;
 
-    //     write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
-    //     free_tree_node(center);
-    //     return NULL;
-    // }
+        write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
+        free_tree_node(center);
+        return NULL;
+    }
 
     if (center==NULL) {center = left;}
     return center;
@@ -242,16 +247,14 @@ node * parse_additive(parser *parse) {
     }
     if (center==NULL) {center = left;}
 
-    // if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
-    //     parse->parsing_status=PARSING_ERROR;
-    //     printf("current token : ");
-    //     print_token(current);
-    //     P_NEW_LINE
-    //     write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
-    //     free_tree_node(center);
-    //     return NULL;
-    // }
+    
+    if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
+        parse->parsing_status=PARSING_ERROR;
 
+        write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
+        free_tree_node(center);
+        return NULL;
+    }
 
     return center;
 
@@ -302,31 +305,39 @@ bool is_num_node(node * n) {
 }
 void display_node(node * n) {
     if (n==NULL) {printf("NULL");}
-    printf("node[ type= %s ", NODE_TYPE_STR[n->type]);
+    printf("node[ type=%s ", NODE_TYPE_STR[n->type]);
     if (n->type==BINARY_NODE || n->type==UNARY_NODE) {
-        printf("operation = ");
+        printf("operation=");
         print_operation(n->operation);
         printf(" ");
     }
     if (n->type==VARIABLE_NODE) {
-        printf("name= %s ", n->string_val);
+        printf("name=%s ", n->string_val);
     }
     if (is_num_node(n)) {
         printf("value=");
         print_num_val(n);
+        printf(" ");
     }
-    printf(" ]");
+    printf("]");
 }
 
 void display_tree_node(node * n) {
-    if (n==NULL) {return;}
+    if (n==NULL) {
+        printf("%s", "NULL");
+        return;
+     }
     if (n->type==BINARY_NODE || n->type==UNARY_NODE) {
         printf("( ");
     }
+    if (n->left!=NULL) {
     display_tree_node(n->left);
+    }
     display_node(n);
     printf(" ");
-    display_tree_node(n->right);
+    if (n->right!=NULL) {
+        display_tree_node(n->right);
+    }
     if (n->type==BINARY_NODE || n->type==UNARY_NODE) {
         printf(") ");
     }
