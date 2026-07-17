@@ -7,9 +7,10 @@
 #include "token.h"
 
 
-#define NL_UPDATE_LEXER(C, LEXER) if (C=='\n') {LEXER->current_line++; LEXER->current_char=0; }  
-#define LEXER_ADV_CHAR(LEXER) LEXER->current
+#define NL_UPDATE_LEXER(LEXER, C) if ( C =='\n') {LEXER->current_line++; LEXER->current_char=0; }  
+#define LEXER_ADV_CHAR(LEXER) LEXER->current_char++;
 
+#define LEXER_ADV_UPDATE(LEXER , C) LEXER_ADV_CHAR(LEXER) NL_UPDATE_LEXER( LEXER, C)
 
 // return true if a substring who start with c is automaticly a new token
 
@@ -45,16 +46,21 @@ bool is_new_token(char c) {
 
 int lexe_number(lexer *lexe, char *code, int start, int str_end) {
     int i=start;
+    int line=lexe->current_line;
+    int character=lexe->current_char;
+
     char * number =malloc(sizeof(char)*30);
     bool integer=true;
-    while (i<str_end && !is_new_token(code[i])) {
+    while (i<str_end && !is_new_token(code[i]) &&isdigit(code[i])) {
         int current_index=i-start;
         char charI=code[i];
+
 
         if (charI=='.') {integer=false;} 
 
         number[current_index]=code[i];
 
+        LEXER_ADV_UPDATE(lexe, charI)
         i++;
 
     }
@@ -62,6 +68,8 @@ int lexe_number(lexer *lexe, char *code, int start, int str_end) {
     int end_index=i-start;
     number[end_index]='\0';
     token t;
+    t.line=line;
+    t.character=character;
     if (integer) {
         t.type=INT;
         t.int_val=atoi(number);
@@ -81,13 +89,17 @@ int lexe_number(lexer *lexe, char *code, int start, int str_end) {
 
 }
 
-int lexe_string(token_array_list* tokens_list, char *code, int start, int str_end) {
+int lexe_string(lexer *lexe, char *code, int start, int str_end) {
     int i=start;
     int current_len = 32;
     char * str =malloc(sizeof(char)*current_len);
+    int line=lexe->current_line;
+    int character=lexe->current_char;
+
     while (i<str_end && !is_new_token(code[i])) {
         int current_index=i-start;
         char charI=code[i];
+
 
         // printf("i=%d - current_index=%d - charI=%c\n", i, current_index, charI);
         if (current_index>current_len) {
@@ -96,12 +108,15 @@ int lexe_string(token_array_list* tokens_list, char *code, int start, int str_en
         }
         str[current_index]=code[i];
 
+        LEXER_ADV_UPDATE(lexe, charI)
         i++;
 
     }
     str[i-start]='\0';
-    token token = {.string_val=str, .type=IDENTIFIER};
-    add_token(tokens_list, token);
+    token t = {.string_val=str, .type=IDENTIFIER ,.line=line, .character=character};
+    add_token(lexe->tokens_list, t);
+    t.line=line;
+    t.character=character;
     return i;
 }
 
@@ -132,50 +147,60 @@ char next_non_space_index(char * str, int i, int end) {
 
 
 
-int lexe_minus(token_array_list* tokens_list, char *code, int i, int str_end) {
+int lexe_minus(lexer *lexe, char *code, int i, int str_end) {
     int non_space_index=next_non_space_index(code, i+1, str_end);
-    if (non_space_index==-1) {
-        return ERROR_RES_I;
-    }
+    int line=lexe->current_line;
+    int character = lexe->current_char;
+    LEXER_ADV_UPDATE(lexe, code[i]);
+
+    token_array_list *tokens_list = lexe->tokens_list;
+
     if (tokens_list->size==0 || is_multiply_minus(tokens_list->elements[tokens_list->size-1])) {
         char next_char = code[non_space_index];
         if (isalpha(next_char) || isdigit(next_char) || next_char=='(' ){
-            add_token(tokens_list, (token) {.type=UNARY_MINUS});
+            add_token(tokens_list, (token) {.type=UNARY_MINUS, .line=line, .character=character});
             return i+1;
         }        
     }
-    add_token(tokens_list, (token) {.type=SUB});
+    add_token(tokens_list, (token) {.type=SUB, .line=line, .character=character});
     return i+1;
 }
-int lexe_operator(token_array_list* tokens_list, char *code, int i, int str_end) {
+int lexe_operator(lexer *lexe, char *code, int i, int str_end) {
     char operator=code[i];
+    int line=lexe->current_line;
+    int character = lexe->current_char;
+    LEXER_ADV_UPDATE(lexe, code[i]);
     if (operator!='-') {
-        add_token(tokens_list, operator_to_token(operator));
+        token result=operator_to_token(operator);
+        result.character=character;
+        result.line=line;
+        add_token(lexe->tokens_list, result);
         return i+1;
     }
 
     else if (operator=='-') {
-        return lexe_minus(tokens_list, code, i, str_end);
+        return lexe_minus(lexe, code, i, str_end);
     }
 
 }
 
 
-int lexe_opening_parenthese(token_array_list* tokens_list, char *code, int i, int str_end) {
-    add_token(tokens_list, (token) {.type=OPENING_PARENTHESE});
+int lexe_opening_parenthese(lexer *lexe, char *code, int i, int str_end) {
+    add_token(lexe->tokens_list, (token) {.type=OPENING_PARENTHESE , .line=lexe->current_line, .character=lexe->current_char});
+    LEXER_ADV_UPDATE(lexe, code[i]);
     return i+1;
 }
 
-int lexe_closing_parenthese(token_array_list* tokens_list, char *code, int i, int str_end) {
-    add_token(tokens_list, (token) {.type=CLOSING_PARENTHESE});
+int lexe_closing_parenthese(lexer *lexe, char *code, int i, int str_end) {
+    add_token(lexe->tokens_list, (token) {.type=CLOSING_PARENTHESE, .character=lexe->current_char, .line=lexe->current_line});
+    LEXER_ADV_UPDATE(lexe, code[i]);
     return i+1;
 }
 
 
 
 token_array_list * lexe_code(char * code) {
-    token_array_list *tokens_list = new_token_array_list();
-
+    lexer *lexe = new_lexer();
 
     int i=0;
     int result_i=NOT_USED_RES_I;
@@ -187,32 +212,35 @@ token_array_list * lexe_code(char * code) {
         // printf("i=%d - charI='%c' - list=\n", i, charI);
         // print_token_list(tokens_list);
         if (isalpha(charI)) {
-            result_i=lexe_string(tokens_list, code, i, end);
+            result_i=lexe_string(lexe, code, i, end);
         }
         else if (isdigit(charI)) {
-            result_i=lexe_number(tokens_list, code, i, end);
+            result_i=lexe_number(lexe, code, i, end);
         }
         else if (is_operator(charI)) {
-            result_i=lexe_operator(tokens_list, code, i, end);
+            result_i=lexe_operator(lexe, code, i, end);
         }
         else if (charI=='=') {
-            add_token(tokens_list, ((token) {.type=AFFECTATION}));
+            add_token(lexe->tokens_list, ((token) {.type=AFFECTATION, .line=lexe->current_line, .character=lexe->current_char}));
+            LEXER_ADV_UPDATE(lexe, charI)
             i++;
         }
         else if (charI==DELIMITATION) {
 
-            add_token(tokens_list, (token) {.type=DELIMITER });
+            add_token(lexe->tokens_list, (token) {.type=DELIMITER ,.line=lexe->current_line, .character=lexe->current_char  });
+            LEXER_ADV_UPDATE(lexe, charI)
             i++;
         }
         else if (charI=='(') {
-            result_i=lexe_opening_parenthese(tokens_list, code, i, end);
+            result_i=lexe_opening_parenthese(lexe, code, i, end);
         }
         else if (charI==')') {
-            result_i=lexe_closing_parenthese(tokens_list, code, i, end);
+            result_i=lexe_closing_parenthese(lexe, code, i, end);
         }
 
         else {
             i++;
+            LEXER_ADV_UPDATE(lexe, charI)
         }
 
         if (result_i==ERROR_RES_I) {
@@ -228,8 +256,8 @@ token_array_list * lexe_code(char * code) {
 
     }
     printf("\ncode lexed\n");
-    add_token(tokens_list, (token) {.type=END});
-    return tokens_list;
+    add_token(lexe->tokens_list, (token) {.type=END, .line=lexe->current_line, .character=lexe->current_char});
+    return lexe->tokens_list;
 
 
 }

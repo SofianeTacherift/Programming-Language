@@ -19,23 +19,22 @@ void print_token_list(token_array_list *list) {
 void write_in_token_buffer(token t) {
     switch(t.type) {
         case INT :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=INT - value=%d]", t.int_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type = INT - value=%d - line=%d - char=%d ]", t.int_val , t.line, t.character);
             break;
         case FLOAT :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=FLOAT - value=%f]", t.float_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type=FLOAT - value=%f - line=%d - char=%d ]", t.float_val, t.line, t.character );
             break;
         case DOUBLE :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=DOUBLE - value=%lf]", t.double_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type=DOUBLE - value=%lf - line=%d - char=%d ]", t.double_val, t.line, t.character );
             break;
         case CHAR :
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=CHAR - value=%c]", t.char_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type=CHAR - value=%c - line=%d - char=%d ]", t.char_val, t.line, t.character );
             break;
         case IDENTIFIER:
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=IDENTIFIER - value=%s]", t.string_val );
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type=IDENTIFIER - value=%s - line=%d - char=%d ]", t.string_val, t.line, t.character );
             break;
         default:
-  
-            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[type=%s]", TOKEN_TYPE_NAMES[t.type]);
+            snprintf(TOKEN_DISPLAY,TOKEN_DISPLAY_SIZE(), "token[ type=%s - line=%d - char=%d ]", TOKEN_TYPE_NAMES[t.type], t.line, t.character);
             break;
     }
 

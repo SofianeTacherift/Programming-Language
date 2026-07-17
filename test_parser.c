@@ -23,13 +23,14 @@ int main(int argc, char ** argv) {
     if (res==NULL) {
         printf("NULL\n");
     }
+    if (parse->parsing_status==PARSING_ERROR) {
+        printf("%s\n", parse->parsing_error_buffer);
+        return 2;
+    }
     printf("parsing result : ");
     display_tree_node(res);
     printf("\n");
 
-    if (parse->parsing_status==PARSING_ERROR) {
-        printf("error during parsing\n");
-    }
 
 
 

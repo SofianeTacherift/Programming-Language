@@ -87,6 +87,7 @@ node * parse_multiplicative(parser * parse);
 node *parse_expression(parser *parse);
 
 void display_node(node * n);
+
 node * parse_additive(parser *parse);
 
 node * parse_statement(parser *parse) ;
@@ -94,6 +95,10 @@ node * parse_statement(parser *parse) ;
 node * parse_identifier(parser * parse);
 
 node * parse_affectation(parser *parse) ;
+ 
+void write_in_error_buffer(parser *parse, int line, int character, int count, ...);
+
+void free_tree_node(node *n);
 
 void display_tree_node(node * node);
 

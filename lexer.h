@@ -24,13 +24,13 @@ static char ERROR_BUFFER[1024];
 
 int lexe_number(lexer *lexe, char *code, int start, int str_end);
 
-int lexe_string( token_array_list *list,  char *code, int start, int str_end);
+int lexe_string( lexer *lexe, char *code, int start, int str_end);
 
 bool is_new_token(char c);
 
 bool is_operator(char c);
 
-int lexe_minus(token_array_list* tokens_list, char *code, int i, int str_end);
+int lexe_minus(lexer *lexe, char *code, int i, int str_end);
 
 token operator_to_token(char c);
 

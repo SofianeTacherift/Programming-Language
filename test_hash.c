@@ -17,12 +17,12 @@ put_entry(table, PSTR(chaine_9), PINT(9));
 put_entry(table, PSTR(chaine_10), PINT(10));
 put_entry(table, PSTR(chaine_11), PINT(11));
 
-printf("Avant d'atteindre le seuil (load factor < 0.75) :\n");
+printf("Before resizing :\n");
 print_hash_table(table, &print_str, &print_int);
 
-put_entry(table, PSTR(chaine_12), PINT(12)); // 12/16 = 0.75, seuil atteint
+put_entry(table, PSTR(chaine_12), PINT(12)); 
 
-printf("Apres avoir atteint le seuil (load factor >= 0.75) :\n");
+printf("After resizing:\n");
 print_hash_table(table, &print_str, &print_int);
 
 return 0;

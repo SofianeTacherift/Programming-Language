@@ -1,5 +1,7 @@
 #include "parser.h"
 #include "token.h"
+#include <stdarg.h>
+
 
 #define P_NEW_LINE printf("\n");
 
@@ -132,11 +134,9 @@ node * unary_token_to_node(token t) {
         result->type=UNARY_NODE;
         result->operation=UNARY_MINUS;
     }
-    else {
-        //error
-    }
     return result;
 }
+
 
 node * parse_unary(parser * parse) {
     RET_NULL_IF_ERROR
@@ -148,8 +148,6 @@ node * parse_unary(parser * parse) {
 }
 node * parse_primary(parser * parse) {
     RET_NULL_IF_ERROR
-
-
     token current = get_current_token(parse);
     node * result;
     if (is_num_token(current)) {
@@ -171,11 +169,12 @@ node * parse_primary(parser * parse) {
         advance(parse);
     }
     else {
+        int line=current.line;
+        int character=current.character;
+        write_in_error_buffer(parse, line, character, 1, "a number, identifier, unary, or opening parenthese");
         parse->parsing_status=PARSING_ERROR;
         return NULL;
     }
-
-
     return result;
 }
 
@@ -203,9 +202,17 @@ node * parse_multiplicative(parser * parse) {
         new_center->right=parse_primary(parse);
         center=new_center;
     }
-    // printf("center=");
-    // display_node(center->right);
-    // printf("\n");
+
+    if (center==NULL) {center = left;}
+    
+    // if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
+    //     parse->parsing_status=PARSING_ERROR;
+
+    //     write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
+    //     free_tree_node(center);
+    //     return NULL;
+    // }
+
     if (center==NULL) {center = left;}
     return center;
 }
@@ -234,6 +241,17 @@ node * parse_additive(parser *parse) {
         center=new_center;
     }
     if (center==NULL) {center = left;}
+
+    // if (!is_operator_token(current) && current.type!=END && current.type!=DELIMITER && current.type!=CLOSING_PARENTHESE) {
+    //     parse->parsing_status=PARSING_ERROR;
+    //     printf("current token : ");
+    //     print_token(current);
+    //     P_NEW_LINE
+    //     write_in_error_buffer(parse, current.line, current.character,4,"an operator","a closing parenthese","';'", "EOF" );
+    //     free_tree_node(center);
+    //     return NULL;
+    // }
+
 
     return center;
 
@@ -313,6 +331,65 @@ void display_tree_node(node * n) {
         printf(") ");
     }
 }
+
+
+
+// void write_in_error_buffer(parser *parse, int line, int character, int count, ...) {
+//     va_list expected;
+//     va_start(expected, count);
+//     char buffer[] = parse->parsing_error_buffer;
+//     char * expected_string[count];
+//     snprintf(buffer, sizeof(buffer), "Error during parsing, expected ");
+//     for (int i=0,j=0; i<count && j<sizeof(buffer);i++, j=strlen(buffer)) {
+//         // expected_string[i]=TOKEN_TYPE_NAMES[va_arg(expected, int)];
+//         int current = va_arg(expected, int);
+//         char * end = strlen(buffer);
+//         if (i<count-1) {snprintf(end, sizeof(buffer) - j, "%s, ",  TOKEN_TYPE_NAMES[current]);}
+//         else {snprintf(end, sizeof(buffer) - j, "%s or ", TOKEN_TYPE_NAMES[current]);}
+//     }
+//     int len=strlen(buffer);
+//     snprintf(buffer+len, sizeof(buffer) - len, " at line %d, character %d.", line, character);
+//     va_end(expected); 
+// }
+
+
+void free_tree_node(node *n) {
+    if (n==NULL) {
+        return;
+    }
+    node *left =n->left;
+    node *right = n->right;
+    free(n);
+    free_tree_node(left);
+    free_tree_node(right);
+}
+
+void write_in_error_buffer(parser *parse, int line, int character, int count, ...) {
+    va_list expected;
+    va_start(expected, count);
+    #define buffer parse->parsing_error_buffer
+    char * expected_string[count];
+    snprintf(buffer, sizeof(buffer), "Error during parsing, expected ");
+    for (int i=0,j=0; i<count && j<sizeof(buffer);i++, j=strlen(buffer)) {
+        // expected_string[i]=TOKEN_TYPE_NAMES[va_arg(expected, int)];
+        char * current = va_arg(expected, char *);
+        char * end = buffer + strlen(buffer);
+        if (i<count-2) {
+            snprintf(end, sizeof(buffer) - j, "%s, ",  current);
+        }
+        else if (i==count-1) {
+            snprintf(end, sizeof(buffer) - j, "%s ",  current);
+        }
+        else {
+            snprintf(end, sizeof(buffer) - j, "%s or ", current);
+        }
+    }
+    int len=strlen(buffer);
+    snprintf(buffer+len, sizeof(buffer) - len, "at line %d, character %d.", line+1, character+1);
+    va_end(expected); 
+    #undef buffer
+}
+
 
 
 
